@@ -8,6 +8,7 @@ app.use(express.json());
 // Routes
 app.use('/api/users', require('./routes/users'));
 app.use('/api/salesmen', require('./routes/salesmen'));
+app.use('/api/products', require('./routes/products'));
 
 const mongoose = require('mongoose');
 
