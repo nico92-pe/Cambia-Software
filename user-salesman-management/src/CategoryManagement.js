@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit, X, Check } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -19,8 +19,6 @@ const ProductForm = ({ onAddProduct, onUpdateProduct, productToEdit, setProductT
       setCatPrice(productToEdit.catPrice.toString());
       setDistPrice(productToEdit.distPrice.toString());
       setMasterQ(productToEdit.masterQ.toString());
-    } else {
-      resetForm();
     }
   }, [productToEdit]);
 
@@ -50,24 +48,20 @@ const ProductForm = ({ onAddProduct, onUpdateProduct, productToEdit, setProductT
     } else {
       await onAddProduct(productData);
     }
+    
+    // Reset form fields
     resetForm();
+    setProductToEdit(null);
   };
 
   const handleCancel = () => {
-    resetForm();
     setProductToEdit(null);
-  }
-  
-  const preventNonNumericInput = (e) => {
-    const invalidChars = ['e', 'E', '+', '-'];
-    if (invalidChars.includes(e.key)) {
-      e.preventDefault();
-    }
+    resetForm();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4 mb-8">
-      <div className="col-span-1">
+    <form onSubmit={handleSubmit} className="space-y-4 mb-8">
+      <div>
         <input
           type="text"
           value={name}
@@ -77,7 +71,7 @@ const ProductForm = ({ onAddProduct, onUpdateProduct, productToEdit, setProductT
           required
         />
       </div>
-      <div className="col-span-1">
+      <div>
         <input
           type="text"
           value={code}
@@ -87,7 +81,7 @@ const ProductForm = ({ onAddProduct, onUpdateProduct, productToEdit, setProductT
           required
         />
       </div>
-      <div className="col-span-1">
+      <div>
         <input
           type="text"
           value={category}
@@ -97,125 +91,103 @@ const ProductForm = ({ onAddProduct, onUpdateProduct, productToEdit, setProductT
           required
         />
       </div>
-      <div className="col-span-1">
+      <div className="flex space-x-2">
         <input
           type="number"
           value={catPrice}
           onChange={(e) => setCatPrice(e.target.value)}
-          onKeyDown={preventNonNumericInput}
           placeholder="Cat Price"
-          className="w-full p-2 border rounded"
+          className="w-1/2 p-2 border rounded"
           min="0"
           step="0.01"
           required
         />
-      </div>
-      <div className="col-span-1">
         <input
           type="number"
           value={distPrice}
           onChange={(e) => setDistPrice(e.target.value)}
-          onKeyDown={preventNonNumericInput}
           placeholder="Dist Price"
-          className="w-full p-2 border rounded"
+          className="w-1/2 p-2 border rounded"
           min="0"
           step="0.01"
           required
         />
       </div>
-      <div className="col-span-1">
+      <div>
         <input
           type="number"
           value={masterQ}
           onChange={(e) => setMasterQ(e.target.value)}
-          onKeyDown={preventNonNumericInput}
           placeholder="Master Q"
           className="w-full p-2 border rounded"
           min="0"
           required
         />
       </div>
-      <div className="col-span-3 flex justify-center space-x-4">
-        <button
-          type="submit"
-          className="px-4 py-2 bg-green-500 text-white rounded flex items-center justify-center"
-        >
-          {productToEdit ? (
-            <>
-              <Check size={16} className="mr-2" /> Update Product
-            </>
-          ) : (
-            <>
-              <Plus size={16} className="mr-2" /> Add Product
-            </>
-          )}
-        </button>
+      <button
+        type="submit"
+        className="w-full p-2 bg-green-500 text-white rounded flex items-center justify-center"
+      >
+        {productToEdit ? (
+          <>
+            <Check size={20} className="mr-2" /> Update Product
+          </>
+        ) : (
+          <>
+            <Plus size={20} className="mr-2" /> Add Product
+          </>
+        )}
+      </button>
+      {productToEdit && (
         <button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 bg-red-500 text-white rounded flex items-center justify-center"
+          className="w-full p-2 bg-red-500 text-white rounded flex items-center justify-center mt-2"
         >
-          <X size={16} className="mr-2" /> Cancel
+          <X size={20} className="mr-2" /> Cancel Edit
         </button>
-      </div>
+      )}
     </form>
   );
 };
 
 const ProductList = ({ products, onEdit }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 10;
-
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
-
-  const totalPages = Math.ceil(products.length / productsPerPage);
-
-  const handleNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  };
-
-  const handlePrevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-  };
-
-    return (
+  return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Product List</h2>
+      <h2 className="text-xl font-semibold mb-2">Product List</h2>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse table-auto">
+        <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Code</th>
-              <th className="p-3 text-left">Category</th>
-              <th className="p-3 text-right">Cat Price</th>
-              <th className="p-3 text-right">Dist Price</th>
-              <th className="p-3 text-right">Master Q</th>
-              <th className="p-3 text-center">Action</th>
+              <th className="p-2 text-left">Name</th>
+              <th className="p-2 text-left">Code</th>
+              <th className="p-2 text-left">Category</th>
+              <th className="p-2 text-right">Cat Price</th>
+              <th className="p-2 text-right">Dist Price</th>
+              <th className="p-2 text-right">Master Q</th>
+              <th className="p-2 text-center">Action</th>
             </tr>
           </thead>
           <tbody>
-            {currentProducts.length === 0 ? (
+            {products.length === 0 ? (
               <tr>
-                <td colSpan="7" className="p-3 text-center">No products added yet</td>
+                <td colSpan="7" className="p-2 text-center">No products added yet</td>
               </tr>
             ) : (
-              currentProducts.map((product) => (
+              products.map((product) => (
                 <tr key={product._id} className="border-t">
-                  <td className="p-3">{product.name}</td>
-                  <td className="p-3">{product.code}</td>
-                  <td className="p-3">{product.category}</td>
-                  <td className="p-3 text-right">${product.catPrice.toFixed(2)}</td>
-                  <td className="p-3 text-right">${product.distPrice.toFixed(2)}</td>
-                  <td className="p-3 text-right">{product.masterQ}</td>
-                  <td className="p-3 text-center">
+                  <td className="p-2">{product.name}</td>
+                  <td className="p-2">{product.code}</td>
+                  <td className="p-2">{product.category}</td>
+                  <td className="p-2 text-right">${product.catPrice.toFixed(2)}</td>
+                  <td className="p-2 text-right">${product.distPrice.toFixed(2)}</td>
+                  <td className="p-2 text-right">{product.masterQ}</td>
+                  <td className="p-2 text-center">
                     <button
                       onClick={() => onEdit(product)}
-                      className="p-2 bg-blue-500 text-white rounded"
+                      className="p-1 bg-blue-500 text-white rounded"
                     >
-                      <Edit size={18} />
+                      <Edit size={16} />
                     </button>
                   </td>
                 </tr>
@@ -223,23 +195,6 @@ const ProductList = ({ products, onEdit }) => {
             )}
           </tbody>
         </table>
-      </div>
-      <div className="flex justify-between items-center mt-4">
-        <button
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-          className="p-2 bg-gray-200 rounded disabled:opacity-50"
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <span>Page {currentPage} of {totalPages}</span>
-        <button
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          className="p-2 bg-gray-200 rounded disabled:opacity-50"
-        >
-          <ChevronRight size={18} />
-        </button>
       </div>
     </div>
   );
@@ -312,20 +267,15 @@ const ProductManagement = () => {
         )
       );
       setError(null);
-      setProductToEdit(null);
     } catch (error) {
       console.error('Error updating product:', error);
       setError('Failed to update product. Please try again.');
     }
   };
 
-  const handleEditClick = (product) => {
-    setProductToEdit(product);
-  };
-
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center">Products Management</h1>
+    <div className="max-w-2xl mx-auto p-4 bg-white shadow-lg rounded-lg">
+      <h1 className="text-2xl font-bold mb-4 text-center">Products</h1>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <ProductForm
         onAddProduct={handleAddProduct}
@@ -335,7 +285,7 @@ const ProductManagement = () => {
       />
       <ProductList
         products={products}
-        onEdit={handleEditClick}
+        onEdit={setProductToEdit}
       />
     </div>
   );
