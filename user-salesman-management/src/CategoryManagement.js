@@ -1,193 +1,168 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, X, Check } from 'lucide-react';
+import { Plus, Edit, X, Check, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
-const ProductForm = ({ onAddProduct, onUpdateProduct, productToEdit, setProductToEdit }) => {
-  const [name, setName] = useState('');
-  const [code, setCode] = useState('');
+const CategoryForm = ({ onAddCategory, onUpdateCategory, categoryToEdit, setCategoryToEdit }) => {
   const [category, setCategory] = useState('');
-  const [catPrice, setCatPrice] = useState('');
-  const [distPrice, setDistPrice] = useState('');
-  const [masterQ, setMasterQ] = useState('');
 
   useEffect(() => {
-    if (productToEdit) {
-      setName(productToEdit.name);
-      setCode(productToEdit.code);
-      setCategory(productToEdit.category);
-      setCatPrice(productToEdit.catPrice.toString());
-      setDistPrice(productToEdit.distPrice.toString());
-      setMasterQ(productToEdit.masterQ.toString());
+    if (categoryToEdit) {
+      setCategory(categoryToEdit.category);
+    } else {
+      resetForm();
     }
-  }, [productToEdit]);
+  }, [categoryToEdit]);
 
   const resetForm = () => {
-    setName('');
-    setCode('');
     setCategory('');
-    setCatPrice('');
-    setDistPrice('');
-    setMasterQ('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const productData = {
-      name,
-      code,
+    const categoryData = {
       category,
-      catPrice: parseFloat(catPrice),
-      distPrice: parseFloat(distPrice),
-      masterQ: parseInt(masterQ),
     };
     
-    if (productToEdit) {
-      await onUpdateProduct(productToEdit._id, productData);
-      setProductToEdit(null);
+    if (categoryToEdit) {
+      await onUpdateCategory(categoryToEdit._id, categoryData);
+      setCategoryToEdit(null);
     } else {
-      await onAddProduct(productData);
+      await onAddCategory(categoryData);
     }
-    
-    // Reset form fields
     resetForm();
-    setProductToEdit(null);
   };
 
   const handleCancel = () => {
-    setProductToEdit(null);
     resetForm();
-  };
+    setCategoryToEdit(null);
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-      <div>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <input
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="Code"
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <input
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Category"
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div className="flex space-x-2">
-        <input
-          type="number"
-          value={catPrice}
-          onChange={(e) => setCatPrice(e.target.value)}
-          placeholder="Cat Price"
-          className="w-1/2 p-2 border rounded"
-          min="0"
-          step="0.01"
-          required
-        />
-        <input
-          type="number"
-          value={distPrice}
-          onChange={(e) => setDistPrice(e.target.value)}
-          placeholder="Dist Price"
-          className="w-1/2 p-2 border rounded"
-          min="0"
-          step="0.01"
-          required
-        />
-      </div>
-      <div>
-        <input
-          type="number"
-          value={masterQ}
-          onChange={(e) => setMasterQ(e.target.value)}
-          placeholder="Master Q"
-          className="w-full p-2 border rounded"
-          min="0"
-          required
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="flex items-center space-x-4 mb-8">
+      <input
+        type="text"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        placeholder="Category"
+        className="flex-grow p-2 border rounded"
+        required
+      />
       <button
         type="submit"
-        className="w-full p-2 bg-green-500 text-white rounded flex items-center justify-center"
+        className="px-4 py-2 bg-green-500 text-white rounded flex items-center justify-center"
       >
-        {productToEdit ? (
+        {categoryToEdit ? (
           <>
-            <Check size={20} className="mr-2" /> Update Product
+            <Check size={16} className="mr-2" /> Update Category
           </>
         ) : (
           <>
-            <Plus size={20} className="mr-2" /> Add Product
+            <Plus size={16} className="mr-2" /> Add Category
           </>
         )}
       </button>
-      {productToEdit && (
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="w-full p-2 bg-red-500 text-white rounded flex items-center justify-center mt-2"
-        >
-          <X size={20} className="mr-2" /> Cancel Edit
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={handleCancel}
+        className="px-4 py-2 bg-red-500 text-white rounded flex items-center justify-center"
+      >
+        <X size={16} className="mr-2" /> Cancel
+      </button>
     </form>
   );
 };
 
-const ProductList = ({ products, onEdit }) => {
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 className="text-xl font-bold mb-4">{title}</h2>
+        <p className="mb-6">{message}</p>
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CategoryList = ({ categories, onEdit, onDelete }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const categoriesPerPage = 10;
+
+  const indexOfLastCategory = currentPage * categoriesPerPage;
+  const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
+  const currentCategories = categories.slice(indexOfFirstCategory, indexOfLastCategory);
+
+  const totalPages = Math.ceil(categories.length / categoriesPerPage);
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleDeleteClick = (category) => {
+    setCategoryToDelete(category);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(categoryToDelete._id);
+    setIsDeleteModalOpen(false);
+    setCategoryToDelete(null);
+  };
+
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-2">Product List</h2>
+      <h2 className="text-2xl font-semibold mb-4">Category List</h2>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse table-auto">
           <thead>
             <tr className="bg-gray-100">
-              <th className="p-2 text-left">Name</th>
-              <th className="p-2 text-left">Code</th>
-              <th className="p-2 text-left">Category</th>
-              <th className="p-2 text-right">Cat Price</th>
-              <th className="p-2 text-right">Dist Price</th>
-              <th className="p-2 text-right">Master Q</th>
-              <th className="p-2 text-center">Action</th>
+              <th className="p-3 text-left">Category</th>
+              <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {products.length === 0 ? (
+            {currentCategories.length === 0 ? (
               <tr>
-                <td colSpan="7" className="p-2 text-center">No products added yet</td>
+                <td colSpan="2" className="p-3 text-center">No categories added yet</td>
               </tr>
             ) : (
-              products.map((product) => (
-                <tr key={product._id} className="border-t">
-                  <td className="p-2">{product.name}</td>
-                  <td className="p-2">{product.code}</td>
-                  <td className="p-2">{product.category}</td>
-                  <td className="p-2 text-right">${product.catPrice.toFixed(2)}</td>
-                  <td className="p-2 text-right">${product.distPrice.toFixed(2)}</td>
-                  <td className="p-2 text-right">{product.masterQ}</td>
-                  <td className="p-2 text-center">
+              currentCategories.map((category) => (
+                <tr key={category._id} className="border-t">
+                  <td className="p-3">{category.category}</td>
+                  <td className="p-3 text-center">
                     <button
-                      onClick={() => onEdit(product)}
-                      className="p-1 bg-blue-500 text-white rounded"
+                      onClick={() => onEdit(category)}
+                      className="p-2 bg-blue-500 text-white rounded mr-2"
                     >
-                      <Edit size={16} />
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(category)}
+                      className="p-2 bg-red-500 text-white rounded"
+                    >
+                      <Trash2 size={18} />
                     </button>
                   </td>
                 </tr>
@@ -196,99 +171,149 @@ const ProductList = ({ products, onEdit }) => {
           </tbody>
         </table>
       </div>
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          className="p-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className="p-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete the category "${categoryToDelete?.category}"?`}
+      />
     </div>
   );
 };
 
-const ProductManagement = () => {
-  const [products, setProducts] = useState([]);
+const CategoryManagement = () => {
+  const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
-  const [productToEdit, setProductToEdit] = useState(null);
+  const [categoryToEdit, setCategoryToEdit] = useState(null);
 
   useEffect(() => {
-    fetchProducts();
+    fetchCategories();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchCategories = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products`);
+      const response = await fetch(`${API_BASE_URL}/categories`);
       if (!response.ok) {
-        throw new Error('Failed to fetch products');
+        throw new Error('Failed to fetch categories');
       }
       const data = await response.json();
-      setProducts(data);
+      setCategories(data);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Failed to load products. Please try again later.');
+      console.error('Error fetching categories:', error);
+      setError('Failed to load categories. Please try again later.');
     }
   };
 
-  const handleAddProduct = async (newProduct) => {
+  const handleAddCategory = async (newCategory) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products`, {
+      const response = await fetch(`${API_BASE_URL}/categories`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newProduct),
+        body: JSON.stringify(newCategory),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add product');
+        throw new Error('Failed to add category');
       }
 
-      const addedProduct = await response.json();
-      setProducts((prevProducts) => [...prevProducts, addedProduct]);
+      const addedCategory = await response.json();
+      setCategories((prevCategories) => [...prevCategories, addedCategory]);
       setError(null);
     } catch (error) {
-      console.error('Error adding product:', error);
-      setError('Failed to add product. Please try again.');
+      console.error('Error adding category:', error);
+      setError('Failed to add category. Please try again.');
     }
   };
 
-  const handleUpdateProduct = async (id, updatedProduct) => {
+  const handleUpdateCategory = async (id, updatedCategory) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedProduct),
+        body: JSON.stringify(updatedCategory),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update product');
+        throw new Error('Failed to update category');
       }
 
-      const updatedProductData = await response.json();
-      setProducts((prevProducts) =>
-        prevProducts.map((product) =>
-          product._id === id ? updatedProductData : product
+      const updatedCategoryData = await response.json();
+      setCategories((prevCategories) =>
+        prevCategories.map((category) =>
+          category._id === id ? updatedCategoryData : category
         )
       );
       setError(null);
+      setCategoryToEdit(null);
     } catch (error) {
-      console.error('Error updating product:', error);
-      setError('Failed to update product. Please try again.');
+      console.error('Error updating category:', error);
+      setError('Failed to update category. Please try again.');
     }
   };
 
+  const handleDeleteCategory = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete category');
+      }
+
+      setCategories((prevCategories) =>
+        prevCategories.filter((category) => category._id !== id)
+      );
+      setError(null);
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      setError('Failed to delete category. Please try again.');
+    }
+  };
+
+  const handleEditClick = (category) => {
+    setCategoryToEdit(category);
+  };
+
   return (
-    <div className="max-w-2xl mx-auto p-4 bg-white shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold mb-4 text-center">Products</h1>
+    <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h1 className="text-3xl font-bold mb-6 text-center">Category Management</h1>
       {error && <div className="text-red-500 mb-4">{error}</div>}
-      <ProductForm
-        onAddProduct={handleAddProduct}
-        onUpdateProduct={handleUpdateProduct}
-        productToEdit={productToEdit}
-        setProductToEdit={setProductToEdit}
+      <CategoryForm
+        onAddCategory={handleAddCategory}
+        onUpdateCategory={handleUpdateCategory}
+        categoryToEdit={categoryToEdit}
+        setCategoryToEdit={setCategoryToEdit}
       />
-      <ProductList
-        products={products}
-        onEdit={setProductToEdit}
+      <CategoryList
+        categories={categories}
+        onEdit={handleEditClick}
+        onDelete={handleDeleteCategory}
       />
     </div>
   );
 };
 
-export default ProductManagement;
+export default CategoryManagement;

@@ -1,9 +1,15 @@
 const mongoose = require('mongoose');
 
-const SalesmanSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  territory: { type: String, required: true }
-});
+const salesmanSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  phoneNumber: { type: String, required: true, trim: true },
+  shortName: { type: String, required: true, trim: true },
+  bankAccount: { type: String, required: true, trim: true },
+  bank: { type: String, required: true, trim: true },
+  birthday: { type: Date,  required: true }
+}, { timestamps: true }
+);
 
-module.exports = mongoose.model('Salesman', SalesmanSchema);
+const Salesman = mongoose.model('Salesman', salesmanSchema);
+
+module.exports = Salesman;

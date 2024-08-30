@@ -4,20 +4,23 @@ const Salesman = require('../models/Salesman');
 
 // Get all salesmen
 router.get('/', async (req, res) => {
-    try {
-      const salesmen = await Salesman.find();
-      res.json(salesmen);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  });
+  try {
+    const salesmen = await Salesman.find();
+    res.json(salesmen);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // Create a salesman
 router.post('/', async (req, res) => {
   const salesman = new Salesman({
     name: req.body.name,
-    email: req.body.email,
-    territory: req.body.territory
+    phoneNumber: req.body.phoneNumber,
+    shortName: req.body.shortName,
+    bankAccount: req.body.bankAccount,
+    bank: req.body.bank,
+    birthday: req.body.birthday
   });
 
   try {
@@ -31,11 +34,24 @@ router.post('/', async (req, res) => {
 // Update a salesman
 router.put('/:id', async (req, res) => {
   try {
-    const updatedSalesman = await Salesman.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedSalesman) return res.status(404).json({ message: 'User not found' });
+    const updatedSalesman = await Salesman.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: req.body.name,
+        phoneNumber: req.body.phoneNumber,
+        shortName: req.body.shortName,
+        bankAccount: req.body.bankAccount,
+        bank: req.body.bank,
+        birthday: req.body.birthday
+      },
+      { new: true }
+    );
+    if (!updatedSalesman) {
+      return res.status(404).json({ message: 'Salesman not found' });
+    }
     res.json(updatedSalesman);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 
@@ -43,10 +59,12 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const deletedSalesman = await Salesman.findByIdAndDelete(req.params.id);
-    if (!deletedSalesman) return res.status(404).json({ message: 'User not found' });
-    res.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (!deletedSalesman) {
+      return res.status(404).json({ message: 'Salesman not found' });
+    }
+    res.json({ message: 'Salesman deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
