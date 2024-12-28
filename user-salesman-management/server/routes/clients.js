@@ -9,6 +9,7 @@ router.post('/', async (req, res) => {
     const savedClient = await newClient.save();
     res.status(201).json(savedClient);
   } catch (error) {
+    console.log('Error detallado:', error);
     res.status(400).json({ message: error.message });
   }
 });

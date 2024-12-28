@@ -27,6 +27,7 @@ router.post('/', async (req, res) => {
     const newSalesman = await salesman.save();
     res.status(201).json(newSalesman);
   } catch (err) {
+    console.log('Error detallado:', err);
     res.status(400).json({ message: err.message });
   }
 });

@@ -111,7 +111,7 @@ const ClientsComponent = () => {
         },
         body: JSON.stringify(clientData),
       });
-
+      console.log(clientData);
       if (!response.ok) {
         throw new Error('Failed to save client');
       }
@@ -281,6 +281,7 @@ const ClientsComponent = () => {
         <InputField label="RUC" value={ruc} onChange={(e) => setRuc(e.target.value)} name="ruc" />
         <InputField label="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} name="fullName" />
         <InputField label="Short Name" value={shortName} onChange={(e) => setShortName(e.target.value)} name="shortName" />
+        
       </Section>
 
       <Section 

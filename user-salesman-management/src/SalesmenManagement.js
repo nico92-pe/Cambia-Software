@@ -303,7 +303,7 @@ const SalesmenManagement = () => {
         },
         body: JSON.stringify(newSalesman),
       });
-
+      console.log(newSalesman);
       if (!response.ok) {
         throw new Error('Failed to add salesman');
       }

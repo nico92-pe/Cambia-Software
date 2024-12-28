@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Printer, Save, ChevronDown } from 'lucide-react';
 
+const API_BASE_URL = 'http://localhost:5000/api';
+
 // Sample product data with image URLs
+
 const productCategories = {
   "Válvulas de Ingreso": [
     { 
@@ -31,13 +34,32 @@ const productCategories = {
 
 const OrderForm = () => {
   const [clientName, setClientName] = useState('');
-  const [salesman, setSalesman] = useState('');
+  const [salesmen, setSalesmen] = useState([]);
+  const [selectedSalesman, setSelectedSalesman] = useState('');
+  const [clients, setClients] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [items, setItems] = useState([]);
   const [productImage, setProductImage] = useState('');
+
+  useEffect(() => {
+    fetchSalesmen();
+  }, []);
+
+  const fetchSalesmen = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/salesmen`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch salesmen');
+      }
+      const data = await response.json();
+      setSalesmen(data);
+    } catch (error) {
+      console.error('Error fetching salesmen:', error);
+    }
+  };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -83,18 +105,35 @@ const OrderForm = () => {
   };
 
   const handleCreatePDF = () => {
-    console.log('Creating PDF for order:', { clientName, salesman, items, total: calculateTotal() });
+    console.log('Creating PDF for order:', { clientName, salesmen, items, total: calculateTotal() });
     alert('PDF creation functionality would be implemented here.');
   };
 
   const handleSaveOrder = () => {
-    console.log('Saving order:', { clientName, salesman, items, total: calculateTotal() });
+    console.log('Saving order:', { clientName, salesmen, items, total: calculateTotal() });
     alert('Order saving functionality would be implemented here.');
   };
 
   return (
     <div className="max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-4 text-center">New Order</h1>
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">Assigned Salesman</label>
+        <select
+          value={selectedSalesman}
+          onChange={(e) => setSelectedSalesman(e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        >
+          <option value="">Select Salesman</option>
+          {salesmen.map((salesman) => (
+            <option key={salesman.id} value={salesman.id}>
+              {salesman.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      
       <div className="space-y-4">
         <div className="mb-4">
           <input
@@ -106,17 +145,7 @@ const OrderForm = () => {
             required
           />
         </div>
-        <div className="mb-4">
-          <input
-            type="text"
-            value={salesman}
-            onChange={(e) => setSalesman(e.target.value)}
-            placeholder="Assigned Salesman"
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        
+      
         <div className="relative mb-2">
           <select
             value={selectedCategory}
