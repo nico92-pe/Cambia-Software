@@ -36,10 +36,11 @@ const OrderForm = () => {
   const [clientName, setClientName] = useState('');
   const [salesmen, setSalesmen] = useState([]);
   const [selectedSalesman, setSelectedSalesman] = useState('');
-  const [clients, setClients] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState('');
-  const [price, setPrice] = useState('');
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState('');  const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [items, setItems] = useState([]);
   const [productImage, setProductImage] = useState('');
@@ -50,6 +51,8 @@ const OrderForm = () => {
   useEffect(() => {
     fetchSalesmen();
     fetchClients();
+    fetchCategories();
+    fetchProducts();
   }, []);
 
   useEffect(() => {
@@ -66,6 +69,21 @@ const OrderForm = () => {
     }
   }, [selectedSalesman, allClients, salesmen]);
 
+  useEffect(() => {
+    if (selectedCategory) {
+
+      const selectedCategoryData = categories.find(c => c._id === selectedCategory);
+      const categoryName = selectedCategoryData ? selectedCategoryData.category : '';
+
+      const filtered = allProducts.filter(product => 
+        product.category === categoryName
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(allProducts);
+    }
+  }, [selectedCategory, allProducts, categories]);
+
   const fetchSalesmen = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/salesmen`);
@@ -76,6 +94,33 @@ const OrderForm = () => {
       setSalesmen(data);
     } catch (error) {
       console.error('Error fetching salesmen:', error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/products`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch clients');
+      }
+      const data = await response.json();
+      setAllProducts(data);
+      setFilteredProducts(data); // Inicialmente mostramos todos
+    } catch (error) {
+      console.error('Error fetching clients:', error);
     }
   };
 
@@ -91,22 +136,6 @@ const OrderForm = () => {
     } catch (error) {
       console.error('Error fetching clients:', error);
     }
-  };
-
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    setSelectedProduct('');
-    setPrice('');
-    setProductImage('');
-    setQuantity('');
-  };
-
-  const handleProductSelect = (productName) => {
-    setSelectedProduct(productName);
-    const product = productCategories[selectedCategory].find(p => p.name === productName);
-    setPrice(product.price.toFixed(2));
-    setProductImage(product.image);
-    setQuantity('');
   };
 
   const handleAddItem = () => {
@@ -168,7 +197,6 @@ const OrderForm = () => {
       
       <div className="space-y-4">
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Client</label>
             <select
               value={selectedClient}
               onChange={(e) => {
@@ -187,37 +215,41 @@ const OrderForm = () => {
               ))}
             </select>
         </div>
-
         
-      
-        <div className="relative mb-2">
-          <select
-            value={selectedCategory}
-            onChange={(e) => handleCategorySelect(e.target.value)}
-            className="w-full p-2 border rounded appearance-none"
-          >
-            <option value="">Select Category</option>
-            {Object.keys(productCategories).map((category) => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2" size={20} />
-        </div>
+        <div className="mb-4">
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        >
+          <option value="">Select Category</option>
+          {categories.map((categories) => (
+            <option key={categories._id} value={categories._id}>
+              {categories.category}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        <div className="relative mb-2">
-          <select
-            value={selectedProduct}
-            onChange={(e) => handleProductSelect(e.target.value)}
-            className="w-full p-2 border rounded appearance-none"
-            disabled={!selectedCategory}
-          >
-            <option value="">Select Product</option>
-            {selectedCategory && productCategories[selectedCategory].map((product) => (
-              <option key={product.name} value={product.name}>{product.name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2" size={20} />
-        </div>
+      <div className="mb-4">
+        <select
+          value={selectedProduct}
+          onChange={(e) => {
+            const selected = filteredProducts.find(p => p._id === e.target.value);
+            setSelectedProduct(e.target.value);
+            setPrice(selected ? selected.price : '');
+          }}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          disabled={!selectedCategory}
+        >
+          <option value="">Select Product</option>
+          {filteredProducts.map((product) => (
+            <option key={product._id} value={product._id}>
+              {product.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
         <div className="flex flex-wrap -mx-2">
           <div className="w-1/2 px-2 mb-2">
