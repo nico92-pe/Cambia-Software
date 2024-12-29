@@ -6,6 +6,7 @@ const API_BASE_URL = 'http://localhost:5000/api';
 const ClientsComponent = () => {
   const [salesmen, setSalesmen] = useState([]);
   const [selectedSalesman, setSelectedSalesman] = useState('');
+  const [selectedSalesmanName, setSelectedSalesmanName] = useState('');
   const [error, setError] = useState(null);
   const [ruc, setRuc] = useState('');
   const [fullName, setFullName] = useState('');
@@ -101,7 +102,8 @@ const ClientsComponent = () => {
         transportAddress,
         transportDistrict,
         transportReference,
-        assignedSalesman: selectedSalesman
+        assignedSalesman: selectedSalesman,
+        assignedSalesmanName: selectedSalesmanName
       };
 
       const response = await fetch(`${API_BASE_URL}/clients`, {
@@ -262,7 +264,13 @@ const ClientsComponent = () => {
         <label className="block text-sm font-medium text-gray-700">Assigned Salesman</label>
         <select
           value={selectedSalesman}
-          onChange={(e) => setSelectedSalesman(e.target.value)}
+          // onChange={(e) => setSelectedSalesman(e.target.value)}
+          onChange={(e) => {
+            const selected = salesmen.find(s => s._id === e.target.value);
+            console.log(selected);
+            setSelectedSalesman(e.target.value);
+            setSelectedSalesmanName(selected ? selected.name : '');
+          }}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
         >
           <option value="">Select Salesman</option>

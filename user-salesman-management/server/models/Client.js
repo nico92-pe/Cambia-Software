@@ -17,7 +17,8 @@ const clientSchema = new mongoose.Schema({
   transportAddress: { type: String },
   transportDistrict: { type: String },
   transportReference: { type: String },
-  assignedSalesman: { type: mongoose.Schema.Types.ObjectId, ref: 'Salesman', required: true }
+  assignedSalesman: { type: mongoose.Schema.Types.ObjectId, ref: 'Salesman', required: true },
+  assignedSalesmanName: { type: String }
 }, { timestamps: true });
 
 const Client = mongoose.model('Client', clientSchema);
