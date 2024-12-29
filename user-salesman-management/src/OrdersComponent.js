@@ -43,10 +43,28 @@ const OrderForm = () => {
   const [quantity, setQuantity] = useState('');
   const [items, setItems] = useState([]);
   const [productImage, setProductImage] = useState('');
+  const [allClients, setAllClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
+  const [selectedClient, setSelectedClient] = useState('');
 
   useEffect(() => {
     fetchSalesmen();
+    fetchClients();
   }, []);
+
+  useEffect(() => {
+    if (selectedSalesman) {
+      const selectedSalesmanData = salesmen.find(s => s._id === selectedSalesman);
+      const salesmanName = selectedSalesmanData ? selectedSalesmanData.name : '';
+      
+      const filtered = allClients.filter(client => 
+        client.assignedSalesmanName === salesmanName // Comparamos nombres
+      );
+      setFilteredClients(filtered);
+    } else {
+      setFilteredClients(allClients);
+    }
+  }, [selectedSalesman, allClients, salesmen]);
 
   const fetchSalesmen = async () => {
     try {
@@ -58,6 +76,20 @@ const OrderForm = () => {
       setSalesmen(data);
     } catch (error) {
       console.error('Error fetching salesmen:', error);
+    }
+  };
+
+  const fetchClients = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/clients`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch clients');
+      }
+      const data = await response.json();
+      setAllClients(data);
+      setFilteredClients(data); // Inicialmente mostramos todos
+    } catch (error) {
+      console.error('Error fetching clients:', error);
     }
   };
 
@@ -127,7 +159,7 @@ const OrderForm = () => {
         >
           <option value="">Select Salesman</option>
           {salesmen.map((salesman) => (
-            <option key={salesman.id} value={salesman.id}>
+            <option key={salesman._id} value={salesman._id}>
               {salesman.name}
             </option>
           ))}
@@ -136,15 +168,27 @@ const OrderForm = () => {
       
       <div className="space-y-4">
         <div className="mb-4">
-          <input
-            type="text"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            placeholder="Client Name"
-            className="w-full p-2 border rounded"
-            required
-          />
+          <label className="block text-sm font-medium text-gray-700">Client</label>
+            <select
+              value={selectedClient}
+              onChange={(e) => {
+                const selected = filteredClients.find(c => c._id === e.target.value);
+                setSelectedClient(e.target.value);
+                setClientName(selected ? selected.fullName : '');
+              }}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              disabled={!selectedSalesman} // Opcional: deshabilitar si no hay vendedor seleccionado
+            >
+              <option value="">Select Client</option>
+              {filteredClients.map((client) => (
+                <option key={client._id} value={client._id}>
+                  {client.fullName}
+                </option>
+              ))}
+            </select>
         </div>
+
+        
       
         <div className="relative mb-2">
           <select
