@@ -24,6 +24,8 @@ const ClientsComponent = () => {
   const [transportAddress, setTransportAddress] = useState('');
   const [transportDistrict, setTransportDistrict] = useState('');
   const [transportReference, setTransportReference] = useState('');
+  const [allClients, setAllClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
 
   // State for active section (only one can be open at a time)
   const [activeSection, setActiveSection] = useState(null);
@@ -42,6 +44,17 @@ const ClientsComponent = () => {
     fetchSalesmen();
     fetchClients();
   }, []);
+
+  useEffect(() => {
+    if (selectedSalesman) {
+      const filtered = allClients.filter(client => 
+        client.assignedSalesman === selectedSalesman
+      );
+      setFilteredClients(filtered);
+    } else {
+      setFilteredClients(allClients); // Mostrar todos cuando no hay vendedor seleccionado
+    }
+  }, [selectedSalesman, allClients]);
 
   const fetchSalesmen = async () => {
     try {
@@ -64,7 +77,8 @@ const ClientsComponent = () => {
         throw new Error('Failed to fetch clients');
       }
       const data = await response.json();
-      setClients(data);
+      setAllClients(data);
+      setFilteredClients(data); // Inicialmente mostramos todos
     } catch (error) {
       console.error('Error fetching clients:', error);
       setError('Failed to load clients. Please try again later.');
@@ -206,6 +220,7 @@ const ClientsComponent = () => {
             </button>
           </div>
           <div className="space-y-2">
+            <p><strong>Salesman:</strong> {client.assignedSalesmanName}</p>
             <p><strong>RUC:</strong> {client.ruc}</p>
             <p><strong>Full Name:</strong> {client.fullName}</p>
             <p><strong>Contact 1:</strong> {client.contact1}</p>
@@ -234,11 +249,11 @@ const ClientsComponent = () => {
   const ClientList = () => (
     <div className="mt-8">
       <h2 className="text-xl font-bold mb-4">Client List</h2>
-      {clients.length === 0 ? (
+      {filteredClients.length === 0 ? (
         <p>No clients found.</p>
       ) : (
         <ul className="space-y-2">
-          {clients.map((client) => (
+          {filteredClients.map((client) => (
             <li key={client._id} className="flex items-center justify-between p-2 bg-gray-100 rounded">
               <span>{client.shortName}</span>
               <button
@@ -264,10 +279,8 @@ const ClientsComponent = () => {
         <label className="block text-sm font-medium text-gray-700">Assigned Salesman</label>
         <select
           value={selectedSalesman}
-          // onChange={(e) => setSelectedSalesman(e.target.value)}
           onChange={(e) => {
             const selected = salesmen.find(s => s._id === e.target.value);
-            console.log(selected);
             setSelectedSalesman(e.target.value);
             setSelectedSalesmanName(selected ? selected.name : '');
           }}
