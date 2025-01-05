@@ -95,7 +95,7 @@ const UserSalesmanManagement = () => {
           {activeTab === 'clients' && <ClientsComponent />}
           {activeTab === 'adminClients' && <AdminClientsComponent />}
           {activeTab === 'categories' && <CategoryComponent />}
-          {activeTab === 'products' && <ProductManagement />}
+          {activeTab === 'Adminproducts' && <ProductManagement />}
           {activeTab === 'orders' && <OrderForm />}
         </div>
       </main>

@@ -19,9 +19,9 @@ router.post('/', async (req, res) => {
     name: req.body.name,
     code: req.body.code,
     category: req.body.category,
+    type: req.body.type,
     catPrice: req.body.catPrice,
-    distPrice: req.body.distPrice,
-    masterQ: req.body.masterQ
+    distPrice: req.body.distPrice
   });
 
   try {
