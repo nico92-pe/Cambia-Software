@@ -15,6 +15,11 @@ const ProductForm = ({ onAddProduct, onUpdateProduct, ProductToEdit, setProductT
   useEffect(() => {
     if (ProductToEdit) {
       setName(ProductToEdit.name);
+      setCode(ProductToEdit.code);
+      setSelectedCategory(ProductToEdit.category);
+      setType(ProductToEdit.type);
+      setcatPrice(ProductToEdit.catPrice);
+      setdistPrice(ProductToEdit.distPrice);
     } else {
       resetForm();
     }
